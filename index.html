@@ -3,7 +3,8 @@
 
 
     <meta charset="utf-8">
-    <link rel="stylesheet" href="/css/master.css" href="style.css">
+    <link rel="stylesheet" href="style.css">
+    <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
     <!-- production version, optimized for size and speed -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css"
     integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
@@ -54,22 +55,33 @@
 
 <body>
 
-  <div id="map" style="height: 500px; width: 1000px;" class="leaflet-container leaflet-touch leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom"></div>
+  <div id="map" class="leaflet-container leaflet-touch leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom"></div>
 
   <script>
 
+  var MyCustomMarker = L.Icon.extend({
+       options: {
+           shadowUrl: null,
+           iconAnchor: new L.Point(12, 12),
+           iconSize: new L.Point(24, 24),
+           iconUrl: 'icons/wheat.png'
+       }
+   });
 
   var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
           osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
           osm = L.tileLayer(osmUrl, { maxZoom: 18, attribution: osmAttrib }),
           map = new L.Map('map', { center: new L.LatLng(56.6442, 16.6637), zoom: 15 }),
           drawnItems = L.featureGroup().addTo(map);
+
+
   L.control.layers({
       'osm': osm.addTo(map),
       "google": L.tileLayer('http://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}', {
           attribution: 'google'
       })
   }, { 'drawlayer': drawnItems }, { position: 'topleft', collapsed: false }).addTo(map);
+
   map.addControl(new L.Control.Draw({
       edit: {
           featureGroup: drawnItems,
@@ -80,15 +92,33 @@
       draw: {
           polygon: {
               allowIntersection: false,
-              showArea: true
-          }
+              showArea: true,
+              icon: new MyCustomMarker(),
+              shapeOptions: {
+                    color: '#ff9900'
+                }
+          },
+          circle: {
+              shapeOptions: {
+                    color: '#3399ff'
+                }
+          },
+          polyline: false,
+          rectangle: false,
+          marker: false,
+          circlemarker: false
       }
   }));
+
 
   map.on(L.Draw.Event.CREATED, function (event) {
       var layer = event.layer;
 
       drawnItems.addLayer(layer);
+      var geojson = layer.toGeoJSON();
+      console.log(geojson);
+      console.log(turf.area(geojson));
+      console.log(drawnItems);
   });
 
   </script>

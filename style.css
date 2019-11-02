@@ -1,4 +1,21 @@
 #map{
-    height: 500px;
-    width: 1000px;
+    height: 800px;
+    width: 1200px;
+}
+
+.leaflet-control-layers{
+    display: none !important;  /*hides the ugly layer controls*/
+}
+
+.leaflet-draw-toolbar .leaflet-draw-draw-polygon {
+    background-color: #ff9900 !important;
+    /*
+    background-image: url(icons/wheat.png) !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+    */
+}
+
+.leaflet-draw-toolbar .leaflet-draw-draw-circle{
+    background-color: #3399ff !important;
 }
