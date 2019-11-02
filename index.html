@@ -51,12 +51,27 @@
       <script src="leaflet.draw/src/edit/handler/Edit.CircleMarker.js"></script>
       <script src="leaflet.draw/src/edit/handler/Edit.Circle.js"></script>
 
+      <!-- Resources -->
+      <script src="https://www.amcharts.com/lib/4/core.js"></script>
+      <script src="https://www.amcharts.com/lib/4/charts.js"></script>
+      <script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
+
+      <style>
+      #chartdiv {
+        width: 100%;
+        height: 500px;
+      }
+
+      </style>
+
 </head>
 
 <body>
 
-  <div id="map" class="leaflet-container leaflet-touch leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom"></div>
-
+  <div >
+  <div id="map" class="leaflet-container leaflet-touch leaflet-retina leaflet-fade-anim leaflet-grab leaflet-touch-drag leaflet-touch-zoom" style="width: 60%; float:left;"></div>
+  <div id="chart_div" style="width: 10%; float:left;height: 800px;">chart </div>
+</div>
   <script>
 
   var MyCustomMarker = L.Icon.extend({
@@ -74,13 +89,13 @@
           map = new L.Map('map', { center: new L.LatLng(56.6442, 16.6637), zoom: 15 }),
           drawnItems = L.featureGroup().addTo(map);
 
-
   L.control.layers({
       'osm': osm.addTo(map),
       "google": L.tileLayer('http://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}', {
           attribution: 'google'
       })
   }, { 'drawlayer': drawnItems }, { position: 'topleft', collapsed: false }).addTo(map);
+
 
   map.addControl(new L.Control.Draw({
       edit: {
@@ -104,10 +119,15 @@
                 }
           },
           polyline: false,
-          rectangle: false,
+          rectangle: {
+            shapeOptions: {
+              color: '#33A033'
+            }
+          },
           marker: false,
           circlemarker: false
       }
+
   }));
 
 
@@ -115,11 +135,74 @@
       var layer = event.layer;
 
       drawnItems.addLayer(layer);
-      var geojson = layer.toGeoJSON();
-      console.log(geojson);
-      console.log(turf.area(geojson));
-      console.log(drawnItems);
+      var geojson = drawnItems.toGeoJSON();
+
+      indexFunc();
   });
+
+  var value = 0;
+  var chart = am4core.create("chart_div", am4charts.XYChart);
+
+  var indexFunc = function()
+  {
+    value = value +5;
+    chart.data = [{
+    "country": "Subsidies (k€)",
+    "visits": value
+    }];
+  };
+
+
+
+  <!-- Chart code -->
+
+  am4core.ready(function() {
+
+  // Themes begin
+  am4core.useTheme(am4themes_animated);
+  // Themes end
+
+  // Create chart instance
+
+
+  // Add data
+  chart.data = [{
+  "country": "Subsidies",
+  "visits": value
+  }];
+
+  // Create axes
+
+  var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
+  categoryAxis.dataFields.category = "country";
+  categoryAxis.renderer.grid.template.location = 0;
+  categoryAxis.renderer.minGridDistance = 30;
+
+  categoryAxis.renderer.labels.template.adapter.add("dy", function(dy, target) {
+    if (target.dataItem && target.dataItem.index & 2 == 2) {
+      return dy + 25;
+    }
+    return dy;
+  });
+
+  var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
+
+  // Create series
+  var series = chart.series.push(new am4charts.ColumnSeries());
+  series.dataFields.valueY = "visits";
+  series.dataFields.categoryX = "country";
+  series.name = "Visits";
+  series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+  series.columns.template.fillOpacity = .8;
+
+  valueAxis.min = 0;
+  valueAxis.max = 10;
+
+  var columnTemplate = series.columns.template;
+  columnTemplate.strokeWidth = 2;
+  columnTemplate.strokeOpacity = 1;
+
+  }); // end am4core.ready()
 
   </script>
 

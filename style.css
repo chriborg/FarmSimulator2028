@@ -19,3 +19,7 @@
 .leaflet-draw-toolbar .leaflet-draw-draw-circle{
     background-color: #3399ff !important;
 }
+
+.leaflet-draw-toolbar .leaflet-draw-draw-rectangle{
+    background-color: #33A033 !important;
+}
